@@ -9,7 +9,7 @@ set cloud-config rancher.cloud_init.datasources=[url:${base-url-config}/ranchero
 
 set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
 set debug-cmdline printk.devkmsg=on console=tty0 console=ttyS1,115200n8 rancher.autologin=tty1 rancher.autologin=ttyS0
-set cmdline ${rancher-disk} ${cloud-config}
+set cmdline ${rancher-disk} ${debug-cmdline} ${cloud-config}
 #  rancher.network.interfaces.eth*.dhcp=true
 set kernel-name vmlinuz-4.9.34-rancher
 set initrd-name initrd-v1.0.3
