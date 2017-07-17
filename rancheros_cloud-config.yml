@@ -1,0 +1,135 @@
+#cloud-config
+---
+ssh_authorized_keys:
+  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUKXJgShJMrBFi6VvKCsCJO9c1wLA3ugL3LAJGsRO9KXdZGmLC74/s0KVw4uaWHoTz91qLPdnplSdLU3KDK7loIdKRBR8E4KJ1MiZKGIj7F9NsniiNetQkKvUazrhRx8nFOAYSPD4znkhrh53nXnsI2WDACt0CGNYX33hV3J/kblWYit/wcIEtJg1ivFmBrljtAMZpS2mBpAK0kySCY2BP+Ph8x+6EuCkH1w2J4Moa0fYkibF3K7O4cmcWAtD53eyr8YN4JKvAwTe+uXVsdFDUNkZvCdOLTDDRd7t7C+qL3nbJMv5jVoED0bBBfn7NfEfyqLOzXHmE4bfuMo7KBlH7 vod@agrajag.0.njk.li"
+
+# mounts:
+#   - ['srv:/exports/config_store', '/opt/config_store', 'nfs', '']
+
+rancher:
+  state:
+    required: true
+    wait: true
+    fstype: auto
+    dev: LABEL=RANCHER_STATE
+    autoformat:
+    - /dev/sda
+  # system_docker:
+  #   storage_driver: overlay2
+  modules: [ath9k, usbip-host]
+  docker:
+    tls: true
+    engine: docker-1.12.6
+    storage_driver: overlay2
+  console: debian
+  network:
+    interfaces:
+      eth0:
+        dhcp: true
+
+  # services:
+
+  #   rancher-server:
+  #     image: rancher/server
+  #     restart: unless-stopped
+  #     ports:
+  #       - 8080:8080
+  #     volumes:
+  #       - /opt/config_store/rancher/mysql:/var/lib/mysql
+
+write_files:
+  - path: /opt/rancher/bin/start.sh
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/usr/bin/env bash
+      # This runs before docker
+      _chk_upgrade() {
+        if apt update | grep -q 'can be upgraded'; then
+          apt -y -qq upgrade
+        fi
+      }
+
+      _mount_nfs() {
+        if ! dpkg -l | grep -q nfs-common; then
+          apt -y -qq install nfs-common
+        fi
+
+        mkdir -p /opt/config_store
+        mkdir -p /var/etcd/backups
+
+        rpcbind
+        # mount magrathea:/exports/config_store /opt/config_store
+        # mount --rbind /opt/config_store/rancher/k8etcd.bkp /var/etcd/backups
+      }
+      _chk_upgrade
+      _mount_nfs
+
+  - path: /etc/rc.local
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/usr/bin/env bash
+      # This runs after docker
+      wait-for-docker
+
+       _pull_images() {
+        images=$(docker images | awk 'NR > 1 {print $1":"$2}')
+        [[ -n "$images" ]] && for i in $images; do docker pull $i; done
+      }
+
+      _enable_kernel_headers() {
+        # -v /usr/src:/usr/src -v /lib/modules:/lib/modules
+        headers=$(ros service list | grep 'disabled kernel' | cut -d ' ' -f2)
+        [[ -n "$headers" ]] && for i in $headers; do (sudo ros service enable $i && sudo ros service up $i); done
+      }
+
+      _load_modules() {
+        modprobe usbip-host
+        modprobe tun
+      }
+
+      _mk_networks() {
+        [[ ! $(docker network ls | grep -qs vpnbridge) ]] && docker network create --driver macvlan --subnet 10.0.0.0/24 --gateway 10.0.0.1 -o parent=eth0 vpnbridge
+      }
+
+       _enable_kernel_headers
+      _pull_images
+      _mk_networks
+
+      exit 0
+  - path: /etc/ssh/sshd_config
+    permissions: "0644"
+    owner: root:root
+    content: |
+      UsePrivilegeSeparation yes
+      ClientAliveInterval 180
+      KeyRegenerationInterval 3600
+      ServerKeyBits 1024
+      SyslogFacility AUTHPRIV
+      LogLevel INFO
+      LoginGraceTime 120
+      PermitRootLogin no
+      StrictModes yes
+      IgnoreRhosts yes
+      RhostsRSAAuthentication no
+      HostbasedAuthentication no
+      PermitEmptyPasswords no
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+      RSAAuthentication yes
+      PubkeyAuthentication yes
+      X11Forwarding yes
+      X11DisplayOffset 10
+      PrintMotd yes
+      PrintLastLog yes
+      TCPKeepAlive yes
+      AcceptEnv LANG LC_*
+      ClientAliveInterval 180
+      UseDNS no
+  - path: "/etc/fuse.conf"
+    permissions: "0640"
+    owner: root:fuse
+    content: |
+      user_allow_other
+...

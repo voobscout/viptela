@@ -1,0 +1,18 @@
+#!ipxe
+# -*- conf-colon -*-
+
+set base-ver v1.0.3
+set base-url https://github.com/rancher/os/releases/download/${base-ver}
+set base-url-config https://raw.githubusercontent.com/voobscout/viptela/master
+set cloud-config rancher.cloud_init.datasources=[url:${base-url-config}/rancheros_cloud-config.yaml]
+
+set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
+set debug-cmdline printk.devkmsg=on console=tty0 console=ttyS1,115200n8 rancher.autologin=tty1 rancher.autologin=ttyS0
+set cmdline ${rancher-disk} ${cloud-config}
+#  rancher.network.interfaces.eth*.dhcp=true
+set kernel-name vmlinuz-4.9.34-rancher
+set initrd-name initrd-v1.0.3
+
+kernel ${base-url}/${kernel-name} ${cmdline}
+initrd ${base-url}/${initrd-name}
+boot
