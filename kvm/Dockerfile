@@ -1,5 +1,4 @@
 FROM centos:latest
-MAINTAINER BBVA Innovation <eurocloud-oneteam.group@bbva.com>
 ENV container docker
 
 RUN yum clean all \
