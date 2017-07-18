@@ -2,27 +2,32 @@
 ---
 ssh_authorized_keys:
   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUKXJgShJMrBFi6VvKCsCJO9c1wLA3ugL3LAJGsRO9KXdZGmLC74/s0KVw4uaWHoTz91qLPdnplSdLU3KDK7loIdKRBR8E4KJ1MiZKGIj7F9NsniiNetQkKvUazrhRx8nFOAYSPD4znkhrh53nXnsI2WDACt0CGNYX33hV3J/kblWYit/wcIEtJg1ivFmBrljtAMZpS2mBpAK0kySCY2BP+Ph8x+6EuCkH1w2J4Moa0fYkibF3K7O4cmcWAtD53eyr8YN4JKvAwTe+uXVsdFDUNkZvCdOLTDDRd7t7C+qL3nbJMv5jVoED0bBBfn7NfEfyqLOzXHmE4bfuMo7KBlH7 vod@agrajag.0.njk.li"
-
-# mounts:
-#   - ['srv:/exports/config_store', '/opt/config_store', 'nfs', '']
-
 rancher:
   state:
-    required: false
-  #   wait: true
-  #   fstype: auto
-  #   dev: LABEL=RANCHER_STATE
-  #   autoformat:
-  #   - /dev/sda
+    required: true
+    wait: true
+    fstype: auto
+    dev: LABEL=RANCHER_STATE
+    autoformat:
+    - /dev/sda
+    - /dev/sdb
+    - /dev/sdc
+    - /dev/sdd
+    - /dev/sde
+    - /dev/sdf
   system_docker:
     storage_driver: overlay2
-  # modules: [ath9k, usbip-host]
+  modules: [kvm, kvm_intel]
   docker:
     # tls: false
     engine: docker-1.13.1
     storage_driver: overlay2
   console: debian
-  # network:
+  network:
+    dns:
+      nameservers:
+      - 173.199.96.96
+      - 173.199.96.97
   #   interfaces:
   #     eth0:
   #       dhcp: true
@@ -84,11 +89,6 @@ write_files:
         [[ -n "$headers" ]] && for i in $headers; do (sudo ros service enable $i && sudo ros service up $i); done
       }
 
-      _load_modules() {
-        modprobe usbip-host
-        modprobe tun
-      }
-
       _mk_networks() {
         [[ ! $(docker network ls | grep -qs management) ]] && docker network create --driver bridge --subnet 10.0.0.0/24 --gateway 10.0.0.1 management
       }
@@ -98,6 +98,7 @@ write_files:
       _mk_networks
 
       exit 0
+
   - path: /etc/ssh/sshd_config
     permissions: "0644"
     owner: root:root
@@ -128,6 +129,7 @@ write_files:
       ClientAliveInterval 180
       UseDNS no
       UsePAM yes
+
   - path: "/etc/fuse.conf"
     permissions: "0640"
     owner: root:fuse
