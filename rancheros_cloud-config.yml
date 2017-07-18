@@ -7,15 +7,15 @@ ssh_authorized_keys:
 #   - ['srv:/exports/config_store', '/opt/config_store', 'nfs', '']
 
 rancher:
-  # state:
-  #   required: true
+  state:
+    required: false
   #   wait: true
   #   fstype: auto
   #   dev: LABEL=RANCHER_STATE
   #   autoformat:
   #   - /dev/sda
-  # system_docker:
-  #   storage_driver: overlay2
+  system_docker:
+    storage_driver: overlay2
   # modules: [ath9k, usbip-host]
   docker:
     # tls: false
