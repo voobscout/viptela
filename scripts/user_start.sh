@@ -4,7 +4,7 @@ mdadm --assemble --scan &> /dev/null
 RAID=$(mdadm --detail --scan | awk '{print $2}')
 
 _install_essentials() {
-    local apps=("nfs-common" "mdadm" "parted")
+    local apps=("nfs-common" "mdadm" "parted" "xfsprogs")
     for i in ${apps[@]}; do
         [[ ! $(apt search $i | grep -i installed) ]] && apt -y install $i
     done
@@ -15,17 +15,37 @@ _mk_raid() {
     for i in "${DISKS[@]}"; do
         md=(${md[@]} /dev/sd$i)
     done
-    mdadm --create --verbose --level=0 --metadata=1.2 --chunk=512 --raid-devices=${#md[@]} /dev/md0 ${md[@]}
+    mdadm --create --level=0 --metadata=1.2 --chunk=512 --raid-devices=${#md[@]} /dev/md0 ${md[@]}
+}
+
+_mk_part() {
+    fdisk /dev/md0 <<EEOF
+g
+n
+
+
+
+w
+EEOF
+    partprobe /dev/md0
+    mkfs.xfs -f -s size=4096 /dev/md0p1
 }
 
 _rm_raid() {
     if [[ -n $RAID ]]; then
         mdadm --stop $RAID
+        mdadm --remove $RAID
         for i in "${DISKS[@]}"; do
             mdadm --misc --zero-superblock /dev/sd$i
+            wipefs -a -f /dev/sd$i
         done
     fi
 }
 
+_mount() {
+    mount /dev/md0p1 /mnt
+}
+
 _install_essentials
-[[ ! -n $RAID ]] && _mk_raid
+[[ ! -n $RAID ]] && (_mk_raid && _mk_part)
+_mount
