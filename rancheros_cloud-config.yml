@@ -28,9 +28,15 @@ rancher:
       nameservers:
       - 173.199.96.96
       - 173.199.96.97
-  #   interfaces:
-  #     eth0:
-  #       dhcp: true
+    interfaces:
+      eth0:
+        dhcp: false
+      eth1:
+        dhcp: false
+      eth2:
+        dhcp: true
+      eth3:
+        dhcp: false
 
   # services:
 
