@@ -8,7 +8,7 @@ set base-url-config https://raw.githubusercontent.com/voobscout/viptela/master
 set cloud-config rancher.cloud_init.datasources=[url:${base-url-config}/rancheros_cloud-config.yaml]
 
 set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
-set debug-cmdline printk.devkmsg=on console=tty0 console=ttyS1,115200n8 rancher.autologin=tty1 rancher.autologin=ttyS0
+set debug-cmdline printk.devkmsg=on console=ttyS1,115200n8 rancher.autologin=ttyS1
 set cmdline ${rancher-disk} ${debug-cmdline} ${cloud-config}
 #  rancher.network.interfaces.eth*.dhcp=true
 set kernel-name vmlinuz-4.9.34-rancher
