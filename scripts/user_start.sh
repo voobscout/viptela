@@ -25,4 +25,5 @@ _mount_nfs() {
     # mount magrathea:/exports/config_store /opt/config_store
     # mount --rbind /opt/config_store/rancher/k8etcd.bkp /var/etcd/backups
 }
+
 _install_essentials

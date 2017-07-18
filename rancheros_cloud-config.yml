@@ -11,11 +11,6 @@ rancher:
     dev: LABEL=RANCHER_STATE
     autoformat:
     - /dev/sda
-    - /dev/sdb
-    - /dev/sdc
-    - /dev/sdd
-    - /dev/sde
-    - /dev/sdf
   # system_docker:
   #   storage_driver: overlay2
   modules: [kvm, kvm_intel]
@@ -55,18 +50,21 @@ write_files:
     owner: root
     content: |
       #!/usr/bin/env bash
-      # This runs before docker
+      # This runs before user-docker
       _chk_upgrade() {
         [[ $(apt update | grep 'can be upgraded') ]] && apt -y full-upgrade
       }
 
-      _install_user_script() {
-        curl https://raw.githubusercontent.com/voobscout/viptela/master/scripts/user_start.sh > /opt/rancher/bin/user_start.sh
-        chmod 0755 /opt/rancher/bin/user_start.sh
+      _install_user_scripts() {
+        local scripts=("user_start.sh" "user_rc.local")
+        for i in ${scripts[@]}; do
+          curl https://raw.githubusercontent.com/voobscout/viptela/master/scripts/$i > /opt/rancher/bin/$i
+          chmod 0755 /opt/rancher/bin/$i
+        done
       }
 
       _chk_upgrade
-      _install_user_script
+      _install_user_scripts
       exec /opt/rancher/bin/user_start.sh
 
   - path: /etc/rc.local
@@ -74,29 +72,9 @@ write_files:
     owner: root
     content: |
       #!/usr/bin/env bash
-      # This runs after system-docker
+      # This runs after user-docker
       wait-for-docker
-
-       _pull_images() {
-        images=$(docker images | awk 'NR > 1 {print $1":"$2}')
-        [[ -n "$images" ]] && for i in $images; do docker pull $i; done
-      }
-
-      _enable_kernel_headers() {
-        # -v /usr/src:/usr/src -v /lib/modules:/lib/modules
-        headers=$(ros service list | grep 'disabled kernel' | cut -d ' ' -f2)
-        [[ -n "$headers" ]] && for i in $headers; do (sudo ros service enable $i && sudo ros service up $i); done
-      }
-
-      _mk_networks() {
-        [[ ! $(docker network ls | grep -qs management) ]] && docker network create --driver bridge --subnet 10.0.0.0/24 --gateway 10.0.0.1 management
-      }
-
-      _enable_kernel_headers
-      _pull_images
-      _mk_networks
-
-      exit 0
+      exec /opt/rancher/bin/user_rc.local
 
   - path: /etc/ssh/sshd_config
     permissions: "0644"

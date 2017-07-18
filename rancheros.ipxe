@@ -6,7 +6,7 @@ set base-url https://github.com/rancher/os/releases/download/${base-ver}
 set base-url-config https://raw.githubusercontent.com/voobscout/viptela/master/rancheros_cloud-config.yml
 
 set cloud-config rancher.cloud_init.datasources=[url:${base-url-config}]
-set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda,/dev/sdb,/dev/sdc,/dev/sdd,/dev/sde,/dev/sdf] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
+set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
 set net-cmd-pre rancher.network.interfaces.eth
 set net-cmd-post-t .dhcp=true
 set net-cmd-post-f .dhcp=false
