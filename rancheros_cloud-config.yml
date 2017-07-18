@@ -11,8 +11,6 @@ rancher:
     dev: LABEL=RANCHER_STATE
     autoformat:
     - /dev/sda
-  # system_docker:
-  #   storage_driver: overlay2
   modules: [kvm, kvm_intel]
   docker:
     # tls: false
@@ -24,15 +22,6 @@ rancher:
       nameservers:
       - 8.8.8.8
       - 8.8.4.4
-    # interfaces:
-    #   eth0:
-    #     dhcp: false
-    #   eth1:
-    #     dhcp: false
-    #   eth2:
-    #     dhcp: true
-    #   eth3:
-    #     dhcp: true
 
   # services:
 
