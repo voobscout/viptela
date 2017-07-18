@@ -1,23 +1,24 @@
 #cloud-config
 ---
+hostname: demo.njk.li
 ssh_authorized_keys:
   - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDUKXJgShJMrBFi6VvKCsCJO9c1wLA3ugL3LAJGsRO9KXdZGmLC74/s0KVw4uaWHoTz91qLPdnplSdLU3KDK7loIdKRBR8E4KJ1MiZKGIj7F9NsniiNetQkKvUazrhRx8nFOAYSPD4znkhrh53nXnsI2WDACt0CGNYX33hV3J/kblWYit/wcIEtJg1ivFmBrljtAMZpS2mBpAK0kySCY2BP+Ph8x+6EuCkH1w2J4Moa0fYkibF3K7O4cmcWAtD53eyr8YN4JKvAwTe+uXVsdFDUNkZvCdOLTDDRd7t7C+qL3nbJMv5jVoED0bBBfn7NfEfyqLOzXHmE4bfuMo7KBlH7 vod@agrajag.0.njk.li"
 rancher:
-  # state:
-  #   required: true
-  #   wait: true
-  #   fstype: auto
-  #   dev: LABEL=RANCHER_STATE
-  #   autoformat:
-  #   - /dev/sda
-    # - /dev/sdb
-    # - /dev/sdc
-    # - /dev/sdd
-    # - /dev/sde
-    # - /dev/sdf
+  state:
+    required: true
+    wait: true
+    fstype: auto
+    dev: LABEL=RANCHER_STATE
+    autoformat:
+    - /dev/sda
+    - /dev/sdb
+    - /dev/sdc
+    - /dev/sdd
+    - /dev/sde
+    - /dev/sdf
   # system_docker:
   #   storage_driver: overlay2
-  # modules: [kvm, kvm_intel]
+  modules: [kvm, kvm_intel]
   docker:
     # tls: false
     engine: docker-1.13.1
