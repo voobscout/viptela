@@ -18,8 +18,8 @@ rancher:
   #   storage_driver: overlay2
   # modules: [ath9k, usbip-host]
   docker:
-    tls: false
-    engine: docker-1.12.6
+    # tls: false
+    engine: docker-1.13.1
     storage_driver: overlay2
   console: debian
   # network:
@@ -90,7 +90,7 @@ write_files:
       }
 
       _mk_networks() {
-        [[ ! $(docker network ls | grep -qs vpnbridge) ]] && docker network create --driver macvlan --subnet 10.0.0.0/24 --gateway 10.0.0.1 -o parent=eth0 vpnbridge
+        [[ ! $(docker network ls | grep -qs management) ]] && docker network create --driver bridge --subnet 10.0.0.0/24 --gateway 10.0.0.1 management
       }
 
       _enable_kernel_headers
@@ -127,6 +127,7 @@ write_files:
       AcceptEnv LANG LC_*
       ClientAliveInterval 180
       UseDNS no
+      UsePAM yes
   - path: "/etc/fuse.conf"
     permissions: "0640"
     owner: root:fuse
