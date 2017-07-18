@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 DISKS=("b" "c" "d" "e" "f")
+mdadm --assemble --scan &> /dev/null
 RAID=$(mdadm --detail --scan | awk '{print $2}')
 
 _install_essentials() {
@@ -14,7 +15,7 @@ _mk_raid() {
     for i in "${DISKS[@]}"; do
         md=(${md[@]} /dev/sd$i)
     done
-    mdadm --create --verbose --level=0 --metadata=1.2 --chunk=1024 --raid-devices=${#md[@]} /dev/md0 ${md[@]}
+    mdadm --create --verbose --level=0 --metadata=1.2 --chunk=512 --raid-devices=${#md[@]} /dev/md0 ${md[@]}
 }
 
 _rm_raid() {
