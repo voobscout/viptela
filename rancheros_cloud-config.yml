@@ -15,19 +15,19 @@ rancher:
     # - /dev/sdd
     # - /dev/sde
     # - /dev/sdf
-  system_docker:
-    storage_driver: overlay2
-  modules: [kvm, kvm_intel]
+  # system_docker:
+  #   storage_driver: overlay2
+  # modules: [kvm, kvm_intel]
   docker:
     # tls: false
     engine: docker-1.13.1
     storage_driver: overlay2
   console: debian
-  network:
-    dns:
-      nameservers:
-      - 173.199.96.96
-      - 173.199.96.97
+  # network:
+  #   dns:
+  #     nameservers:
+  #     - 173.199.96.96
+  #     - 173.199.96.97
     # interfaces:
     #   eth0:
     #     dhcp: false
