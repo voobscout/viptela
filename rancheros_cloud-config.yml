@@ -10,11 +10,11 @@ rancher:
     dev: LABEL=RANCHER_STATE
     autoformat:
     - /dev/sda
-    - /dev/sdb
-    - /dev/sdc
-    - /dev/sdd
-    - /dev/sde
-    - /dev/sdf
+    # - /dev/sdb
+    # - /dev/sdc
+    # - /dev/sdd
+    # - /dev/sde
+    # - /dev/sdf
   system_docker:
     storage_driver: overlay2
   modules: [kvm, kvm_intel]
