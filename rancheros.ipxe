@@ -14,7 +14,7 @@ set rancher-network ${net-cmd-pre}0${net-cmd-post-f} ${net-cmd-pre}1${net-cmd-po
 set debug-state-off rancher.state.dev=none
 set debug-cmdline printk.devkmsg=on console=ttyS1,115200n8 rancher.autologin=ttyS1
 set cmdline ${debug-cmdline} ${cloud-config}
-# ${rancher-network}
+# ${rancher-network} ${rancher-disk}
 set kernel-name vmlinuz-4.9.34-rancher
 set initrd-name initrd-v1.0.3
 
