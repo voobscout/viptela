@@ -6,17 +6,20 @@ set base-url https://github.com/rancher/os/releases/download/${base-ver}
 set base-url-config https://raw.githubusercontent.com/voobscout/viptela/master/rancheros_cloud-config.yml
 
 set cloud-config rancher.cloud_init.datasources=[url:${base-url-config}]
-set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
+set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda,/dev/sdb,/dev/sdc,/dev/sdd,/dev/sde,/dev/sdf] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
 set net-cmd-pre rancher.network.interfaces.eth
 set net-cmd-post-t .dhcp=true
 set net-cmd-post-f .dhcp=false
 set rancher-network ${net-cmd-pre}0${net-cmd-post-f} ${net-cmd-pre}1${net-cmd-post-f} ${net-cmd-pre}2${net-cmd-post-t} ${net-cmd-pre}3${net-cmd-post-f}
 set debug-state-off rancher.state.dev=none
-set debug-cmdline printk.devkmsg=on console=ttyS1,115200n8 rancher.autologin=ttyS1
-set cmdline ${net-cmd-pre}2${net-cmd-post-t} ${debug-cmdline} ${cloud-config}
-# ${rancher-network} ${rancher-disk}
-set kernel-name vmlinuz-4.9.34-rancher
-set initrd-name initrd-v1.0.3
+set debug-kmsg printk.devkmsg=on
+set debug-cmdline console=ttyS1,115200n8 rancher.autologin=ttyS1
+set cmdline ${rancher-disk} ${debug-cmdline} ${cloud-config}
+# ${rancher-network}
+set kernel-name vmlinuz
+#-4.9.34-rancher
+set initrd-name initrd
+#-v1.0.3
 
 kernel ${base-url}/${kernel-name} ${cmdline}
 initrd ${base-url}/${initrd-name}
