@@ -4,7 +4,7 @@ mdadm --assemble --scan &> /dev/null
 RAID=$(mdadm --detail --scan | awk '{print $2}')
 
 _install_essentials() {
-    local apps=("nfs-common" "mdadm" "parted" "xfsprogs")
+    local apps=("nfs-common" "mdadm" "xfsprogs" "p7zip-full")
     for i in ${apps[@]}; do
         [[ ! $(apt search $i | grep -i installed) ]] && apt -y install $i
     done

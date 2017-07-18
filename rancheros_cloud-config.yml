@@ -11,7 +11,7 @@ rancher:
     dev: LABEL=RANCHER_STATE
     autoformat:
     - /dev/sda
-  modules: [kvm, kvm_intel]
+  modules: [kvm, kvm_intel, vhost-net]
   docker:
     # tls: false
     engine: docker-1.13.1
