@@ -1,6 +1,5 @@
 #!ipxe
 # -*- conf-colon -*-
-# dhcp bond0
 
 set base-ver v1.0.3
 set base-url https://github.com/rancher/os/releases/download/${base-ver}
