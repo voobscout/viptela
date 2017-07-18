@@ -27,8 +27,8 @@ rancher:
   network:
     dns:
       nameservers:
-      - 173.199.96.96
-      - 173.199.96.97
+      - 8.8.8.8
+      - 8.8.4.4
     # interfaces:
     #   eth0:
     #     dhcp: false
