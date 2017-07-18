@@ -36,7 +36,7 @@ rancher:
       eth2:
         dhcp: true
       eth3:
-        dhcp: false
+        dhcp: true
 
   # services:
 
