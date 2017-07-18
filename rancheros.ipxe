@@ -5,7 +5,7 @@
 set base-ver v1.0.3
 set base-url https://github.com/rancher/os/releases/download/${base-ver}
 set base-url-config https://raw.githubusercontent.com/voobscout/viptela/master/rancheros_cloud-config.yaml
-set http-base-url-config http://dpaste.com/053ZVRT.txt
+set http-base-url-config http://dpaste.com/1DJJNBC.txt
 
 set cloud-config rancher.cloud_init.datasources=[url:${http-base-url-config}]
 set rancher-disk rancher.state.formatzero rancher.state.autoformat=[/dev/sda] rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait
