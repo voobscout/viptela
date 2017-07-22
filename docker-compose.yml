@@ -83,6 +83,8 @@ services:
       - 3024
       - 3025
       - 3080
+    ports:
+      - 3080:3080
 
   postgres:
     image: postgres
@@ -216,34 +218,34 @@ services:
   #     - n_172_16_7_0__24
   #     - n_10_0_7_0__24
 
-  # # Alternative definition with ENV
-  # e-regdc2:
-  #   image: voobscout/viptela
-  #   environment:
-  #     VM_NAME: e-regdc2
-  #     VM_TITLE: 'e-regdc2 North West quadrant on Diagram'
-  #     VM_MEM: 2048m
-  #     VM_CPUS: 4
-  #     VM_NET: '10.10.10.0/24 192.168.7.0/24 172.16.7.0/24 10.0.7.0/24'
-  #     VM_DISK: /var/lib/libvirt/images/ubuntu1_1604.qcow2
-  #     VM_DISK_SIZE: 5G
-  #   hostname: e-regdc2
-  #   domainname: njk.li
-  #   privileged: true
-  #   stdin_open: true
-  #   tty: true
-  #   restart: always
-  #   tmpfs:
-  #     - /tmp
-  #     - /run
-  #   volumes:
-  #     - /mnt/images:/var/lib/libvirt/images
-  #     - /sys/fs/cgroup:/sys/fs/cgroup
-  #   networks:
-  #     - management
-  #     - n_192_168_7_0__24
-  #     - n_172_16_7_0__24
-  #     - n_10_0_7_0__24
+  # Alternative definition with ENV
+  e-regdc1:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-regdc1
+      VM_TITLE: 'e-regdc1 North West quadrant on Diagram'
+      VM_MEM: 2048m
+      VM_CPUS: 4
+      VM_NET: '10.10.10.0/24 192.168.7.0/24 172.16.7.0/24 10.0.7.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-image-genericx86-64.qcow2
+      VM_DISK_SIZE: 5G
+    hostname: e-regdc1
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_192_168_7_0__24
+      - n_172_16_7_0__24
+      - n_10_0_7_0__24
 
 networks:
   management:
