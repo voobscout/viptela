@@ -21,6 +21,8 @@ RUN pacman --noconfirm -Syy --needed \
     vim && \
     gem install --no-user-install clamp nokogiri bytes_converter ruby-ip
 
+RUN runuser -l dev -c 'yaourt --noconfirm -Syyu --aur teleport'
+
 # Patch rootfs
 COPY overlay /
 
