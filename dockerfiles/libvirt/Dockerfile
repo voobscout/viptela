@@ -21,9 +21,8 @@ RUN pacman --noconfirm -Syy --needed \
     vim && \
     gem install --no-user-install clamp nokogiri bytes_converter ruby-ip
 
-COPY domrun.service /lib/systemd/system/domrun.service
-COPY libvirtd_override.conf /etc/systemd/system/libvirtd.service.d/override.conf
-COPY runner /usr/local/bin/runner
+# Patch rootfs
+COPY ./overlay /
 
 RUN systemctl enable libvirtd.service && \
     systemctl enable sshd.service && \
