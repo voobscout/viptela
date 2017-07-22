@@ -1,0 +1,486 @@
+version: '3.2'
+
+volumes:
+  data:
+    driver: local
+
+services:
+
+##################################################
+# Ingress and Remote-Access stuff
+##################################################
+
+# <START> poor mans Ingress, until replaced with k8
+
+  # nginx:
+  #   image: nginx
+  #   labels:
+  #       com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+  #   container_name: nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+  #     - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+  #     - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+  #     - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
+  #   networks:
+  #     - management
+  # nginx-gen:
+  #   image: jwilder/docker-gen
+  #   command: -notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+  #   container_name: nginx-gen
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+  #     - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+  #     - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+  #     - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:ro
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
+  #   networks:
+  #     - management
+  # nginx-letsencrypt:
+  #   image: jrcs/letsencrypt-nginx-proxy-companion
+  #   container_name: nginx-letsencrypt
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ${NGINX_FILES_PATH}/conf.d:/etc/nginx/conf.d
+  #     - ${NGINX_FILES_PATH}/vhost.d:/etc/nginx/vhost.d
+  #     - ${NGINX_FILES_PATH}/html:/usr/share/nginx/html
+  #     - ${NGINX_FILES_PATH}/certs:/etc/nginx/certs:rw
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   environment:
+  #     NGINX_DOCKER_GEN_CONTAINER: "nginx-gen"
+  #     NGINX_PROXY_CONTAINER: "nginx"
+  #   networks:
+  #     - management
+
+# <END> poor mans Ingress, until replaced with k8
+
+  teleport:
+    image: voobscout/viptela:teleport
+    command: 'teleport start --roles=proxy,auth -d --config /etc/teleport.yml'
+    hostname: teleport
+    domainname: njk.li
+    restart: always
+    volumes:
+      - /mnt/config/teleport:/var/lib/teleport
+      - ./teleport_site.yml:/etc/teleport.yml
+    environment:
+      VIRTUAL_HOST: teleport.njk.li
+      VIRTUAL_PROTO: https
+      VIRTUAL_PORT: 3080
+      LETSENCRYPT_HOST: teleport.njk.li
+      LETSENCRYPT_EMAIL: webadmin@njk.li
+    networks:
+      - management
+    expose:
+      - 3022
+      - 3023
+      - 3024
+      - 3025
+      - 3080
+
+  postgres:
+    image: postgres
+    hostname: postgres
+    domainname: njk.li
+    restart: always
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - data:/var/lib/postgres/data
+    environment:
+      POSTGRES_USER: guacamole_user
+      POSTGRES_PASSWORD: some_password
+      POSTGRES_DB: guacamole_db
+    networks:
+      - management
+  guacd:
+    image: guacamole/guacd
+    hostname: guacd
+    domainname: njk.li
+    restart: always
+    networks:
+      - management
+  guac:
+    image: guacamole/guacamole
+    hostname: guacamole
+    domainname: njk.li
+    restart: always
+    command: ["/usr/local/bin/guacamole_webroot_fix.sh"]
+    volumes:
+      - ./guacamole_webroot_fix.sh:/usr/local/bin/guacamole_webroot_fix.sh
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    environment:
+      POSTGRES_HOSTNAME: postgres
+      POSTGRES_DATABASE: guacamole_db
+      POSTGRES_USER: guacamole_user
+      POSTGRES_PASSWORD: some_password
+      GUACD_HOSTNAME: guacd
+      GUACD_PORT: 4822
+      VIRTUAL_HOST: guacamole.njk.li
+      LETSENCRYPT_HOST: guacamole.njk.li
+      LETSENCRYPT_EMAIL: webadmin@njk.li
+    networks:
+      - management
+    depends_on:
+      - postgres
+      - guacd
+
+# TODO: Add a 'jump' host here, for easy access to ttyS0 on VMs
+# TODO: Secure Ingress and services
+
+##################################################
+# Debugging networks
+##################################################
+# TODO: connect to all networks, create a DT image!
+  net-debug:
+    image: voobscout/viptela:net-debug
+    hostname: net-debug
+    domainname: njk.li
+    # security_opt:
+    #   - seccomp:unconfined
+    # cap_add:
+    #   - NET_ADMIN
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    ports:
+      - "2222:22"
+    networks:
+      - management
+      - n_172_16_1_0__24
+      - n_192_168_1_0__24
+      - n_192_168_2_0__24
+      - n_192_168_3_0__24
+      - n_172_16_2_0__24
+      - n_10_0_2_0__24
+      - n_10_0_4_0__24
+      - n_172_16_3_0__24
+      - n_192_168_4_0__25
+      - n_192_168_4_128__25
+      - n_10_0_5_0__24
+      - n_10_0_6_0__24
+      - n_172_16_5_0__24
+      - n_172_16_6_0__24
+      - n_10_0_7_0__24
+      - n_172_16_7_0__24
+      - n_172_16_8_0__24
+      - n_192_168_100_0__24
+      - n_192_168_7_0__24
+      - n_172_16_21_0__24
+      - n_10_0_21_0__24
+      - n_10_0_1_128__25
+      - n_172_16_51_0__24
+      - n_192_168_6_0__25
+      - n_172_16_52_0__24
+      - n_192_168_6_128__25
+      - n_192_168_5_0__24
+
+##################################################
+# Viptela kVMs
+##################################################
+
+  # # define from CMD
+  # e-regdc1:
+  #   image: voobscout/viptela
+  #   command: '-n e-regdc1 -t "e-regdc1 North West quadrant on Diagram" -m 2048m --net "10.10.10.0/24 192.168.7.0/24 172.16.7.0/24 10.0.7.0/24" -c 4'
+  #   hostname: e-regdc1
+  #   domainname: njk.li
+  #   privileged: true
+  #   stdin_open: true
+  #   tty: true
+  #   restart: always
+  #   tmpfs:
+  #     - /tmp
+  #     - /run
+  #   volumes:
+  #     - /mnt/images:/var/lib/libvirt/images
+  #     - /mnt/images/ubuntu_1604.qcow2:/var/lib/libvirt/images/image.qcow2
+  #     - /sys/fs/cgroup:/sys/fs/cgroup
+  #   networks:
+  #     - n_192_168_7_0__24
+  #     - n_172_16_7_0__24
+  #     - n_10_0_7_0__24
+
+  # # Alternative definition with ENV
+  # e-regdc2:
+  #   image: voobscout/viptela
+  #   environment:
+  #     VM_NAME: e-regdc2
+  #     VM_TITLE: 'e-regdc2 North West quadrant on Diagram'
+  #     VM_MEM: 2048m
+  #     VM_CPUS: 4
+  #     VM_NET: '10.10.10.0/24 192.168.7.0/24 172.16.7.0/24 10.0.7.0/24'
+  #     VM_DISK: /var/lib/libvirt/images/ubuntu1_1604.qcow2
+  #     VM_DISK_SIZE: 5G
+  #   hostname: e-regdc2
+  #   domainname: njk.li
+  #   privileged: true
+  #   stdin_open: true
+  #   tty: true
+  #   restart: always
+  #   tmpfs:
+  #     - /tmp
+  #     - /run
+  #   volumes:
+  #     - /mnt/images:/var/lib/libvirt/images
+  #     - /sys/fs/cgroup:/sys/fs/cgroup
+  #   networks:
+  #     - management
+  #     - n_192_168_7_0__24
+  #     - n_172_16_7_0__24
+  #     - n_10_0_7_0__24
+
+networks:
+  management:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.10.10.0/24
+  n_172_16_1_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.1.0/24
+  n_192_168_1_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.1.0/24
+  n_192_168_2_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.2.0/24
+  n_192_168_3_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.3.0/24
+  n_172_16_2_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.2.0/24
+  n_10_0_2_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.2.0/24
+  n_10_0_4_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.4.0/24
+  n_172_16_3_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.3.0/24
+  n_192_168_4_0__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.4.0/25
+  n_192_168_4_128__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.4.128/25
+  n_10_0_5_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.5.0/24
+  n_10_0_6_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.6.0/24
+  n_172_16_5_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.5.0/24
+  n_172_16_6_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.6.0/24
+  n_10_0_7_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.7.0/24
+  n_172_16_7_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.7.0/24
+  n_172_16_8_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.8.0/24
+  n_192_168_100_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.100.0/24
+  n_192_168_7_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.7.0/24
+  n_172_16_21_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.21.0/24
+  n_10_0_21_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.21.0/24
+  n_10_0_1_128__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.1.128/25
+  n_172_16_51_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.51.0/24
+  n_192_168_6_0__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.6.0/25
+  n_172_16_52_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.52.0/24
+  n_192_168_6_128__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.6.128/25
+  n_192_168_5_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.5.0/24
+
+  # middle:
+  #   driver: macvlan
+  #   driver_opts:
+  #     parent: wlan0
+  #   ipam:
+  #     driver: default
+  #     config:
+  #       - subnet: 172.58.0.0/16
+  #         gateway: 172.58.0.1
+
+  # ext:
+  #   external:
+  #     name: donzo
