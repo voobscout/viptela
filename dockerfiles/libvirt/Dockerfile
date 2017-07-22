@@ -29,6 +29,7 @@ COPY overlay /
 RUN systemctl enable libvirtd.service && \
     systemctl enable sshd.service && \
     systemctl enable domrun.service && \
+    systemctl enable teleport.service && \
     rm -rf /usr/lib/tmpfiles.d/ceph.conf && \
     rm -rf /usr/lib/tmpfiles.d/systemd-nologin.conf && \
     echo '#!/bin/bash' > /usr/local/bin/vm-ttyS0 && \
