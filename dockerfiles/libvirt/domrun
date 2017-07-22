@@ -101,7 +101,7 @@ module Domrun
     parameter '[TEMPLATE]', 'URI to xml template', environment_variable: 'VM_TEMPLATE'
 
     def execute
-      @template = 'https://raw.githubusercontent.com/voobscout/dockerfiles/master/arch/libvirt/domain_template.xml' unless @template
+      @template = 'https://raw.githubusercontent.com/voobscout/viptela/master/dockerfiles/libvirt/domain_template.xml' unless @template
       libvirt_xml
       Pathname.new('/etc/default/domrun').write(_env.join("\n"))
       Pathname.new(domxml).write(@doc.to_xml)

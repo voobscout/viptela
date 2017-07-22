@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 commandline_args=("$@")
-curl https://raw.githubusercontent.com/voobscout/dockerfiles/master/arch/libvirt/domrun > /usr/local/bin/domrun
+curl https://raw.githubusercontent.com/voobscout/viptela/master/dockerfiles/libvirt/domrun > /usr/local/bin/domrun
 chmod 0755 /usr/local/bin/domrun
 exec /usr/local/bin/domrun "${commandline_args[@]}"
 

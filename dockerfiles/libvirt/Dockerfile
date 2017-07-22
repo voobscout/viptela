@@ -22,7 +22,7 @@ RUN pacman --noconfirm -Syy --needed \
     gem install --no-user-install clamp nokogiri bytes_converter ruby-ip
 
 # Patch rootfs
-COPY ./overlay /
+COPY overlay /
 
 RUN systemctl enable libvirtd.service && \
     systemctl enable sshd.service && \
