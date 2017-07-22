@@ -9,7 +9,7 @@ module Domrun
     @doc.at_css('name').content = name
     @doc.at_css('title').content = title
     attach_networks
-    @doc.at_css('disk').at_css('source')['file'] = copy(disk)
+    @doc.at_css('disk').at_css('source')['file'] = disk #copy(disk)
     %w(memory currentMemory).each { |c| @doc.at_css(c).content = mem}
     @doc.at_css('vcpu').content = cpus
   end

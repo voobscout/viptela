@@ -57,7 +57,7 @@ services:
   #     NGINX_PROXY_CONTAINER: "nginx"
   #   networks:
   #     - management
-
+# FIXME: Mkae sure to remove 'ports' section from service definitions, after enabling the above section!
 # <END> poor mans Ingress, until replaced with k8
 
   teleport:
@@ -126,8 +126,8 @@ services:
       POSTGRES_PASSWORD: some_password
       GUACD_HOSTNAME: guacd
       GUACD_PORT: 4822
-      VIRTUAL_HOST: guacamole.njk.li
-      LETSENCRYPT_HOST: guacamole.njk.li
+      VIRTUAL_HOST: vnc.njk.li
+      LETSENCRYPT_HOST: vnc.njk.li
       LETSENCRYPT_EMAIL: webadmin@njk.li
     networks:
       - management
