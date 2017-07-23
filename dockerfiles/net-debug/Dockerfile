@@ -20,6 +20,5 @@ RUN runuser -l dev -c 'yaourt --noconfirm --needed -Syyu \
                          putty \
                          umit \
                          tigervnc \
+                         teleport \
                          iproute2'
-
-# docker run --name xfce -ti --rm -v /sys/fs/cgroup:/sys/fs/cgroup:ro --tmpfs /tmp --tmpfs /run --security-opt=seccomp:unconfined
