@@ -33,7 +33,8 @@ RUN systemctl enable libvirtd.service && \
     rm -rf /usr/lib/tmpfiles.d/ceph.conf && \
     rm -rf /usr/lib/tmpfiles.d/systemd-nologin.conf && \
     echo '#!/bin/bash' > /usr/local/bin/vm-ttyS0 && \
-    echo 'exec telnet localhost 4555' >> /usr/local/bin/vm-ttyS0 && \
+    echo 'teleport status' >> /usr/local/bin/vm-ttyS0 && \
+    echo 'exec telnet 127.0.0.1 4555' >> /usr/local/bin/vm-ttyS0 && \
     chmod 0755 /usr/local/bin/vm-ttyS0 && \
     chsh -s /usr/local/bin/vm-ttyS0 dev && \
     sed -i 's/#StrictModes yes/StrictModes no/g' /etc/ssh/sshd_config
