@@ -19,8 +19,8 @@ module Domrun
     raise unless (backing_file.exist? && backing_file.dirname.writable?)
     qcow2_disk_name = backing_file.basename.to_s.gsub('.qcow2', '') + '-' + `hostname`.strip + '.qcow2'
     qcow2_disk = (backing_file.dirname + qcow2_disk_name)
-    # `cp #{backing_file.to_s} #{qcow2_disk.to_s}` unless qcow2_disk.exist?
-    `qemu-img create -f qcow2 #{qcow2_disk.to_s} -o backing_file=#{backing_file.to_s} #{disk_size}` unless qcow2_disk.exist?
+    `cp #{backing_file.to_s} #{qcow2_disk.to_s}` unless qcow2_disk.exist?
+    # `qemu-img create -f qcow2 #{qcow2_disk.to_s} -o backing_file=#{backing_file.to_s} #{disk_size}` unless qcow2_disk.exist?
     qcow2_disk.to_s
   end
 
