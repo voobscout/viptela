@@ -16,6 +16,7 @@ RUN runuser -l dev -c 'yaourt --noconfirm --needed -Syyu \
                          terminator \
                          wireshark-gtk \
                          wireshark-cli \
+                         gtkglext \
                          putty \
                          umit \
                          tigervnc \

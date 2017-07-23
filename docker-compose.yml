@@ -62,7 +62,7 @@ services:
 
   teleport:
     image: voobscout/viptela:teleport
-    command: 'teleport start --roles=proxy,auth -d --config /etc/teleport.yml'
+    command: 'teleport start --roles=proxy,auth --config /etc/teleport.yml'
     hostname: teleport
     domainname: njk.li
     restart: always
@@ -218,18 +218,44 @@ services:
   #     - n_172_16_7_0__24
   #     - n_10_0_7_0__24
 
+##################################################
+# 1 - Site1
+# 2 - Site2
+# 3 - Site3-Legacy
+# B2B - Business-to-Business
+# INET - Internet
+# DC - DataCenter
+# RegDC - Regional DataCenter
+# B - vBond
+# S - vSmart
+# M - vManage
+# FW - Firewall
+# E on top of the two DC boxes - DataCenter-Core-Switch
+# WAN EM - WAN-Emulator
+# UX SRV below 1 - Client-Site1
+# UX Desktop below 2 - Client-Site2
+# UX SRV below 3 - Client-Site3
+##################################################
+# E - 2GB RAM, 2 vCPU, 4GB disk - viptela-edge-genericx86-64.qcow2
+# S - 2GB RAM, 2 vCPU, 4Gb disk - viptela-smart-genericx86-64.qcow2
+# M - 16GB RAM, 8 vCPU, 10Gb disk - viptela-vmanage-genericx86-64.qcow2
+# pfSense - 1GB RAM, 1 vCPU, 1Gb disk
+# WAN emulator - 512MB RAM, 1 vCPU, 4Gb
+# CSR 1Kv - 4GB RAM, 1 vCPU, 8GB disk
+##################################################
+
   # Alternative definition with ENV
-  e-regdc1:
+  e-reg-dc:
     image: voobscout/viptela
     environment:
-      VM_NAME: e-regdc1
-      VM_TITLE: 'e-regdc1 North West quadrant on Diagram'
+      VM_NAME: e-reg-dc
+      VM_TITLE: 'E - Regional DataCenter'
       VM_MEM: 2048m
-      VM_CPUS: 4
+      VM_CPUS: 2
       VM_NET: '10.10.10.0/24 192.168.7.0/24 172.16.7.0/24 10.0.7.0/24'
-      VM_DISK: /var/lib/libvirt/images/viptela-image-genericx86-64.qcow2
-      VM_DISK_SIZE: 5G
-    hostname: e-regdc1
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-reg-dc
     domainname: njk.li
     privileged: true
     stdin_open: true
@@ -246,6 +272,126 @@ services:
       - n_192_168_7_0__24
       - n_172_16_7_0__24
       - n_10_0_7_0__24
+
+  e-core-switch:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-core-switch
+      VM_TITLE: 'E - DataCenter Core Switch'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 192.168.5.0/24 172.16.51.0/24 192.168.6.0/25 172.16.52.0/24 192.168.6.128/25'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-core-switch
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_192_168_5_0__24
+      - n_172_16_51_0__24
+      - n_192_168_6_0__25
+      - n_172_16_52_0__24
+      - n_192_168_6_128__25
+
+  e-dc-left:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-dc-left
+      VM_TITLE: 'E - Regional DataCenter - Left'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 172.16.51.0/24 192.168.6.0/25 10.0.5.0/24 172.16.5.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-dc-left
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_172_16_51_0__24
+      - n_192_168_6_0__25
+      - n_10_0_5_0__24
+      - n_172_16_5_0__24
+
+  e-dc-right:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-dc-right
+      VM_TITLE: 'E - Regional DataCenter - Right'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 172.16.52.0/24 192.168.6.128/25 172.16.6.0/24 10.0.6.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-dc-right
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_172_16_52_0__24
+      - n_192_168_6_128__25
+      - n_172_16_6_0__24
+      - n_10_0_6_0__24
+
+  e-inet:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-inet
+      VM_TITLE: 'E - Internet router'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 10.0.7.0/24 10.0.5.0/24 172.16.8.0/24 10.0.6.0/24 10.0.1.128/25 10.0.4.0/24 10.0.2.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-inet
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_7_0__24
+      - n_10_0_5_0__24
+      - n_172_16_8_0__24
+      - n_10_0_6_0__24
+      - n_10_0_1_128__25
+      - n_10_0_4_0__24
+      - n_10_0_2_0__24
 
 networks:
   management:
