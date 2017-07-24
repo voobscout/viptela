@@ -1,5 +1,6 @@
 <domain type='kvm'>
   <name>wanem23master</name>
+  <title>this is visible in virt-manager</title>
   <memory unit='KiB'>1048576</memory>
   <currentMemory unit='KiB'>1048576</currentMemory>
   <vcpu placement='static'>1</vcpu>
