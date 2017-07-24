@@ -57,6 +57,7 @@ services:
   #     NGINX_PROXY_CONTAINER: "nginx"
   #   networks:
   #     - management
+
 # FIXME: Mkae sure to remove 'ports' section from service definitions, after enabling the above section!
 # <END> poor mans Ingress, until replaced with k8
 
@@ -111,6 +112,8 @@ services:
     restart: always
     networks:
       - management
+# TODO: Change main login page html to skip guacamole logos and have 'SD-WAN Demo'
+# URI sdwan-demo.com/desktop
   guac:
     image: guacamole/guacamole
     hostname: guacamole
@@ -238,6 +241,10 @@ services:
 # WAN emulator - 512MB RAM, 1 vCPU, 4Gb
 # CSR 1Kv - 4GB RAM, 1 vCPU, 8GB disk
 ##################################################
+# public_ip
+# ns1 173.199.96.97
+# ns2 173.199.96.96
+##################################################
 
   # Alternative definition with ENV
   e-reg-dc:
@@ -268,6 +275,8 @@ services:
       - n_172_16_7_0__24
       - n_10_0_7_0__24
 
+# TODO: sdwan-demo.com/firewall
+# WAN interface to EGRESS
   pfsense:
     image: voobscout/viptela
     environment:
@@ -295,6 +304,7 @@ services:
       - egress
       - n_192_168_7_0__24
 
+# TODO: connect NIC to EGRESS
   e-core-switch:
     image: voobscout/viptela
     environment:
@@ -383,6 +393,7 @@ services:
       - n_172_16_6_0__24
       - n_10_0_6_0__24
 
+# TODO: Connect one nic to EGRESS
   e-inet:
     image: voobscout/viptela
     environment:
@@ -448,12 +459,34 @@ services:
       - n_172_16_3_0__24
 
 ##################################################
-# TODO: Wanem place holder
-# Take Wanem and make it boot over ipxe, with mounting NFS for root
-# DEFAULT linux
-# APPEND ramdisk_size=100000 init=/etc/init lang=us apm=power-off vga=791 initrd=minirt.gz nomce highres=off loglevel=0 libata.atapi_enabled=1 quiet SELINUX_INIT=NO nmi_watchdog=0 BOOT_IMAGE=knoppix
-# add console=ttyS0 to above
-##################################################
+# TODO: URI: sdwan-demo.com/wanem
+  wanem:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: wanem
+      VM_TITLE: 'WanEm - http://wanem.sourceforge.net/'
+      VM_MEM: 500m
+      VM_CPUS: 1
+      VM_NET: '10.10.10.0/24 10.0.1.128/25 10.0.1.0/25'
+      VM_DISK: /var/lib/libvirt/images/wanem-2.3-x86_64.qcow2
+      VM_TEMPLATE: 'https://raw.githubusercontent.com/voobscout/viptela/master/resources/domain_template_wanem.xml'
+      VM_DISK_SIZE: 5G
+    hostname: wanem
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_1_128__25
+      - n_10_0_1_0__25
 
   e-site1:
     image: voobscout/viptela
@@ -552,6 +585,12 @@ services:
       - n_192_168_2_0__24
 
 # TODO: have it teleport into cluster
+# VNC session from desktop be accessible on sdwan-demo.com/desktop
+# Direct vnc, without guacamole menu
+# MAC via guacamole auth
+# Infinite login timeout on guac sessions
+# Xvnc port per user on machine
+# For onetime setup effort - direct access via ssh from outside
   ux-desktop-site2:
     image: voobscout/viptela:net-debug
     hostname: ux-desktop-site2
@@ -677,6 +716,7 @@ services:
       - n_10_0_21_0__24
       - n_192_168_100_0__24
 
+# TODO: separate URI - sdwan-demo.com/vmanage
   vmanage:
     image: voobscout/viptela
     environment:
