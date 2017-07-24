@@ -84,6 +84,10 @@ services:
       - 3025
       - 3080
     ports:
+      - 3022:3022
+      - 3023:3023
+      - 3024:3024
+      - 3025:3025
       - 3080:3080
 
   postgres:
@@ -135,9 +139,6 @@ services:
       - postgres
       - guacd
 
-# TODO: Add a 'jump' host here, for easy access to ttyS0 on VMs
-# TODO: Secure Ingress and services
-
 ##################################################
 # Debugging networks
 ##################################################
@@ -146,10 +147,6 @@ services:
     image: voobscout/viptela:net-debug
     hostname: net-debug
     domainname: njk.li
-    # security_opt:
-    #   - seccomp:unconfined
-    # cap_add:
-    #   - NET_ADMIN
     privileged: true
     stdin_open: true
     tty: true
@@ -158,10 +155,7 @@ services:
       - /tmp
       - /run
     volumes:
-      - /mnt/images:/var/lib/libvirt/images
       - /sys/fs/cgroup:/sys/fs/cgroup
-    ports:
-      - "2222:22"
     networks:
       - management
       - n_172_16_1_0__24
@@ -191,6 +185,7 @@ services:
       - n_172_16_52_0__24
       - n_192_168_6_128__25
       - n_192_168_5_0__24
+      - n_10_0_1_0__25
 
 ##################################################
 # Viptela kVMs
@@ -272,6 +267,33 @@ services:
       - n_192_168_7_0__24
       - n_172_16_7_0__24
       - n_10_0_7_0__24
+
+  pfsense:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: pfsense
+      VM_TITLE: 'pfSense 2.3.4 embedded kernel'
+      VM_MEM: 1024m
+      VM_CPUS: 1
+      VM_NET: '10.10.10.0/24 10.11.11.0/24 192.168.7.0/24'
+      VM_DISK: /var/lib/libvirt/images/pfSense_234.qcow2
+      VM_DISK_SIZE: 5G
+    hostname: pfsense
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - egress
+      - n_192_168_7_0__24
 
   e-core-switch:
     image: voobscout/viptela
@@ -393,6 +415,423 @@ services:
       - n_10_0_4_0__24
       - n_10_0_2_0__24
 
+  e-mpls:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-mpls
+      VM_TITLE: 'E - MPLS'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 172.16.7.0/24 172.16.5.0/24 172.16.6.0/24 10.0.7.0/24 172.16.1.0/24 172.16.2.0/24 172.16.3.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-mpls
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_172_16_7_0__24
+      - n_172_16_5_0__24
+      - n_172_16_6_0__24
+      - n_10_0_7_0__24
+      - n_172_16_1_0__24
+      - n_172_16_2_0__24
+      - n_172_16_3_0__24
+
+##################################################
+# TODO: Wanem place holder
+# Take Wanem and make it boot over ipxe, with mounting NFS for root
+# DEFAULT linux
+# APPEND ramdisk_size=100000 init=/etc/init lang=us apm=power-off vga=791 initrd=minirt.gz nomce highres=off loglevel=0 libata.atapi_enabled=1 quiet SELINUX_INIT=NO nmi_watchdog=0 BOOT_IMAGE=knoppix
+# add console=ttyS0 to above
+##################################################
+
+  e-site1:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-site1
+      VM_TITLE: 'E - Site 1'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 10.0.1.0/25 172.16.1.0/24 192.168.1.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-site1
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_1_0__25
+      - n_172_16_1_0__24
+      - n_192_168_1_0__24
+
+  ux-srv-site1:
+    image: voobscout/viptela:teleport
+    command: 'teleport start --roles=node --token=internalxyz --auth-server=teleport:3025'
+    hostname: ux-srv-site1
+    domainname: njk.li
+    restart: always
+    networks:
+      - management
+      - n_192_168_1_0__24
+
+  e-left-site2:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-left-site2
+      VM_TITLE: 'E - Left Site 2'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 10.0.2.0/24 172.16.21.0/24 10.0.21.0/24 192.168.2.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-left-site2
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_2_0__24
+      - n_172_16_21_0__24
+      - n_10_0_21_0__24
+      - n_192_168_2_0__24
+
+  e-right-site2:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-right-site2
+      VM_TITLE: 'E - Right Site 2'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 10.0.21.0/24 172.16.21.0/24 172.16.2.0/24 192.168.2.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-right-site2
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_21_0__24
+      - n_172_16_21_0__24
+      - n_172_16_2_0__24
+      - n_192_168_2_0__24
+
+  ux-desktop-site2:
+    image: voobscout/viptela:net-debug
+    hostname: ux-desktop-site2
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_192_168_2_0__24
+
+  e-bond1-demo:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-bond1-demo
+      VM_TITLE: 'E - vBond1 Upper right (demonstrator)'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 192.168.100.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-bond1-demo
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_21_0__24
+      - n_192_168_100_0__24
+
+  e-bond2-demo:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-bond2-demo
+      VM_TITLE: 'E - vBond2 Upper right (demonstrator)'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 192.168.100.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: e-bond2-demo
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_21_0__24
+      - n_192_168_100_0__24
+
+  s-smart1-demo:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: s-smart1-demo
+      VM_TITLE: 'S - vSmart1 Upper right (demonstrator)'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 192.168.100.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-smart-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: s-smart1-demo
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_21_0__24
+      - n_192_168_100_0__24
+
+  s-smart2-demo:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: s-smart2-demo
+      VM_TITLE: 'S - vSmart2 Upper right (demonstrator)'
+      VM_MEM: 2048m
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 192.168.100.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-smart-genericx86-64.qcow2
+      VM_DISK_SIZE: 4G
+    hostname: s-smart2-demo
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_21_0__24
+      - n_192_168_100_0__24
+
+  vmanage:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: vmanage
+      VM_TITLE: 'M - vManage Upper right (demonstrator)'
+      VM_MEM: 16g
+      VM_CPUS: 8
+      VM_NET: '10.10.10.0/24 192.168.100.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-vmanage-genericx86-64.qcow2
+      VM_DISK_SIZE: 10G
+    hostname: vmanage
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_21_0__24
+      - n_192_168_100_0__24
+
+  e-cloud:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-cloud
+      VM_TITLE: 'E - Cloud Upper right (demonstrator)'
+      VM_MEM: 2g
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 192.168.100.0/24 172.16.8.0/24 10.0.7.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 5G
+    hostname: e-cloud
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_192_168_100_0__24
+      - n_172_16_8_0__24
+      - n_10_0_7_0__24
+
+  e-b2b:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: e-b2b
+      VM_TITLE: 'E - B2B East-Side'
+      VM_MEM: 2g
+      VM_CPUS: 2
+      VM_NET: '10.10.10.0/24 10.0.4.0/24 192.168.4.0/24'
+      VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
+      VM_DISK_SIZE: 5G
+    hostname: e-b2b
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_10_0_4_0__24
+      - n_192_168_4_0__25
+
+  csr1k-b2b:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: csr1k-b2b
+      VM_TITLE: 'B2B - Cisco CSR 1k'
+      VM_MEM: 4g
+      VM_CPUS: 1
+      VM_NET: '10.10.10.0/24 192.168.4.0/25 192.168.4.128/25'
+      VM_DISK: /var/lib/libvirt/images/csr1000v-universalk9.03.12.00.S.154-2.S-std.qcow2
+      VM_DISK_SIZE: 8G
+    hostname: csr1k-b2b
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_192_168_4_0__25
+      - n_192_168_4_128__25
+
+  csr1k-site3:
+    image: voobscout/viptela
+    environment:
+      VM_NAME: csr1k-site3
+      VM_TITLE: 'Site3 - Cisco CSR 1k'
+      VM_MEM: 4g
+      VM_CPUS: 1
+      VM_NET: '10.10.10.0/24 172.16.3.0/24 192.168.3.0/24'
+      VM_DISK: /var/lib/libvirt/images/csr1000v-universalk9.03.12.00.S.154-2.S-std.qcow2
+      VM_DISK_SIZE: 8G
+    hostname: csr1k-site3
+    domainname: njk.li
+    privileged: true
+    stdin_open: true
+    tty: true
+    restart: always
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - /mnt/images:/var/lib/libvirt/images
+      - /sys/fs/cgroup:/sys/fs/cgroup
+    networks:
+      - management
+      - n_172_16_3_0__24
+      - n_192_168_3_0__24
+
+  ux-srv-b2b:
+    image: voobscout/viptela:teleport
+    command: 'teleport start --roles=node --token=internalxyz --auth-server=teleport:3025'
+    hostname: ux-srv-b2b
+    domainname: njk.li
+    restart: always
+    networks:
+      - management
+      - n_192_168_4_128__25
+
+  ux-srv-site3:
+    image: voobscout/viptela:teleport
+    command: 'teleport start --roles=node --token=internalxyz --auth-server=teleport:3025'
+    hostname: ux-srv-site3
+    domainname: njk.li
+    restart: always
+    networks:
+      - management
+      - n_192_168_3_0__24
+
 networks:
   management:
     driver: bridge
@@ -402,6 +841,14 @@ networks:
       driver: default
       config:
       - subnet: 10.10.10.0/24
+  egress:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.11.11.0/24
   n_172_16_1_0__24:
     driver: bridge
     driver_opts:
@@ -570,6 +1017,14 @@ networks:
       driver: default
       config:
       - subnet: 10.0.21.0/24
+  n_10_0_1_0__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.1.0/25
   n_10_0_1_128__25:
     driver: bridge
     driver_opts:
@@ -618,16 +1073,6 @@ networks:
       driver: default
       config:
       - subnet: 192.168.5.0/24
-
-  # middle:
-  #   driver: macvlan
-  #   driver_opts:
-  #     parent: wlan0
-  #   ipam:
-  #     driver: default
-  #     config:
-  #       - subnet: 172.58.0.0/16
-  #         gateway: 172.58.0.1
 
   # ext:
   #   external:
