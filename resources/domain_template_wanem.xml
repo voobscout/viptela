@@ -23,7 +23,7 @@
       <source file='/var/lib/libvirt/images/wanem_master.qcow2'/>
       <target dev='hda' bus='ide'/>
     </disk>
-    <interface type='network'>
+    <interface type='ethernet'>
       <target dev='vnet7'/>
       <model type='e1000'/>
       <script path='/etc/qemu-ifup-mynet'/>
