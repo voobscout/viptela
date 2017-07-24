@@ -551,6 +551,7 @@ services:
       - n_172_16_2_0__24
       - n_192_168_2_0__24
 
+# TODO: have it teleport into cluster
   ux-desktop-site2:
     image: voobscout/viptela:net-debug
     hostname: ux-desktop-site2
