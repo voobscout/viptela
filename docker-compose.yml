@@ -640,8 +640,8 @@ services:
       - /run
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
-      # - ./scripts/enable_teleport:/etc/container-boot.d/enable_teleport
       - ./dockerfiles/libvirt/overlay/etc/systemd/system/teleport.service.d/override.conf:/etc/systemd/system/teleport.service.d/override.conf
+      - ./resources/xvnc.service:/etc/systemd/system/xvnc.service
     networks:
       - management
       - n_192_168_2_0__24

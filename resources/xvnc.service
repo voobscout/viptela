@@ -1,0 +1,13 @@
+[Unit]
+Description=Remote desktop service (VNC)
+After=lightdm.service
+Requires=lightdm.service
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/default/xvnc
+StandardError=syslog
+ExecStart=/usr/sbin/Xvnc :1 -SecurityTypes=None -alwaysshared -geometry 1024x768 -depth 16 -query 127.0.0.1 -rfbport 5900
+
+[Install]
+WantedBy=multi-user.target
