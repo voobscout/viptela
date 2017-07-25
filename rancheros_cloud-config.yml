@@ -102,4 +102,3 @@ write_files:
     content: |
       user_allow_other
 ...
-# docker run --name tt --rm -ti  -v /mnt/images/ubuntu_1604.qcow2:/var/lib/libvirt/images/image.qcow2 -v /sys/fs/cgroup:/sys/fs/cgroup -v /tmp/domrun:/etc/default/domrun --privileged --tmpfs /tmp voobscout/base-arch:libvirt

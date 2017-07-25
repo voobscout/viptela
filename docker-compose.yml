@@ -112,6 +112,7 @@ services:
     restart: always
     networks:
       - management
+
 # TODO: Change main login page html to skip guacamole logos and have 'SD-WAN Demo'
 # URI sdwan-demo.com/desktop
   guac:
@@ -121,7 +122,7 @@ services:
     restart: always
     command: ["/usr/local/bin/guacamole_webroot_fix.sh"]
     volumes:
-      - ./guacamole_webroot_fix.sh:/usr/local/bin/guacamole_webroot_fix.sh
+      - ./scripts/guacamole_webroot_fix.sh:/usr/local/bin/guacamole_webroot_fix.sh
     expose:
       - 8080
     ports:
