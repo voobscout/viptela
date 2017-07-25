@@ -159,6 +159,8 @@ services:
       - /run
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
+      - ./scripts/enable_teleport.sh:/etc/container-boot.d/enable_teleport.sh
+      - ./dockerfiles/libvirt/overlay/etc/systemd/system/teleport.service.d/override.conf:/etc/systemd/system/teleport.service.d/override.conf
     networks:
       - management
       - n_172_16_1_0__24
@@ -604,6 +606,8 @@ services:
       - /run
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
+      - ./scripts/enable_teleport.sh:/etc/container-boot.d/enable_teleport.sh
+      - ./dockerfiles/libvirt/overlay/etc/systemd/system/teleport.service.d/override.conf:/etc/systemd/system/teleport.service.d/override.conf
     networks:
       - management
       - n_192_168_2_0__24
