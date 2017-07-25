@@ -165,7 +165,7 @@ services:
     networks:
       - management
     depends_on:
-      - postgres
+      - mariadb
       - guacd
 
 ##################################################
