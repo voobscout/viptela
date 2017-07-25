@@ -10,7 +10,7 @@ RUN curl https://blackarch.org/strap.sh > /tmp/ba_repo && \
     /tmp/ba_repo && \
     sudo find /var/cache/pacman/pkg -mindepth 1 -delete
 
-RUN runuser -l dev -c 'yaourt --noconfirm --needed -Syyu \
+RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu \
                          xfce4 \
                          xfce4-goodies \
                          terminator \
