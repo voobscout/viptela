@@ -145,7 +145,7 @@ services:
 ##################################################
 # Debugging networks
 ##################################################
-# TODO: connect to all networks, create a DT image!
+# FIXME: teleport doesn't work!
   net-debug:
     image: voobscout/viptela:net-debug
     hostname: net-debug
@@ -154,6 +154,8 @@ services:
     stdin_open: true
     tty: true
     restart: always
+    depends_on:
+      - teleport
     tmpfs:
       - /tmp
       - /run
@@ -265,6 +267,8 @@ services:
     stdin_open: true
     tty: true
     restart: always
+    depends_on:
+      - teleport
     tmpfs:
       - /tmp
       - /run
@@ -593,6 +597,8 @@ services:
 # Infinite login timeout on guac sessions
 # Xvnc port per user on machine
 # For onetime setup effort - direct access via ssh from outside
+
+# FIXME: teleport doesn't work!
   ux-desktop-site2:
     image: voobscout/viptela:net-debug
     hostname: ux-desktop-site2
@@ -601,6 +607,8 @@ services:
     stdin_open: true
     tty: true
     restart: always
+    depends_on:
+      - teleport
     tmpfs:
       - /tmp
       - /run
