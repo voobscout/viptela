@@ -500,7 +500,7 @@ services:
       VM_MEM: 500m
       VM_CPUS: 1
       VM_NET: '10.10.10.0/24 10.0.1.128/25 10.0.1.0/25'
-      VM_DISK: /var/lib/libvirt/images/wanem-2.3-x86_64.qcow2
+      VM_DISK: /var/lib/libvirt/images/wanem-2.3-x86-64.qcow2
       VM_TEMPLATE: 'https://raw.githubusercontent.com/voobscout/viptela/master/resources/domain_template_wanem.xml'
       VM_DISK_SIZE: 5G
     hostname: wanem
