@@ -641,7 +641,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - ./dockerfiles/libvirt/overlay/etc/systemd/system/teleport.service.d/override.conf:/etc/systemd/system/teleport.service.d/override.conf
-      - ./resources/xvnc.service:/etc/systemd/system/xvnc.service
+      - ./resources/xvnc_defaults:/etc/default/xvnc
     networks:
       - management
       - n_192_168_2_0__24
