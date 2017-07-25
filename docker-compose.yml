@@ -1,8 +1,8 @@
 version: '3.2'
 
-volumes:
-  data:
-    driver: local
+# volumes:
+#   data:
+#     driver: local
 
 services:
 
@@ -94,21 +94,6 @@ services:
 # TODO: guacamole images get updated, need to always keep the latest init script version with
 # docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysq > ~/mysql_initdb.sql
 
-  # postgres:
-  #   image: postgres
-  #   hostname: postgres
-  #   domainname: njk.li
-  #   restart: always
-  #   volumes:
-  #     - ./resources/guacamole_initdb_postgres.sql:/docker-entrypoint-initdb.d/init.sql
-  #     - data:/var/lib/postgres/data
-  #   environment:
-  #     POSTGRES_USER: guacamole_user
-  #     POSTGRES_PASSWORD: some_password
-  #     POSTGRES_DB: guacamole_db
-  #   networks:
-  #     - management
-
   mariadb:
     image: mariadb
     hostname: mariadb
@@ -118,7 +103,8 @@ services:
     restart: always
     volumes:
       - ./resources/guacamole_initdb_mysql.sql:/docker-entrypoint-initdb.d/init.sql
-      - data:/var/lib/postgres/data
+      # - data:/var/lib/mysql
+      - ./resources/mysql_debug.cnf:/etc/mysql/mariadb.conf.d/debug.cnf
     environment:
       # MYSQL_ROOT_PASSWORD: root_passwd
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
