@@ -7,7 +7,7 @@ Requires=lightdm.service
 Type=simple
 EnvironmentFile=-/etc/default/xvnc
 StandardError=syslog
-ExecStart=/usr/sbin/Xvnc :1 -SecurityTypes=None -alwaysshared -geometry 1024x768 -depth 16 -query 127.0.0.1 -rfbport 5900
+ExecStart=/usr/sbin/Xvnc :1 -SecurityTypes=None -alwaysshared -geometry $VNC_GEOMETRY -depth $VNC_BPP -query $XDMCP_HOST -rfbport $VNC_PORT
 
 [Install]
 WantedBy=multi-user.target

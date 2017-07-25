@@ -28,4 +28,7 @@ RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu && \
                          teleport \
                          iproute2'
 
-RUN systemctl enable teleport.service
+ADD https://raw.githubusercontent.com/voobscout/viptela/master/resources/xvnc.service /usr/lib/systemd/system/xvnc.service
+
+RUN systemctl enable teleport.service && \
+    systemctl enable xvnc.service
