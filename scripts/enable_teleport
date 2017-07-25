@@ -1,2 +1,2 @@
 #!/bin/bash
-systemctl enable teleport.service
+systemctl enable teleport.service --now
