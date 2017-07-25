@@ -22,3 +22,5 @@ RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu \
                          tigervnc \
                          teleport \
                          iproute2'
+
+RUN systemctl enable teleport.service
