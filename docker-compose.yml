@@ -119,7 +119,7 @@ services:
       - data:/var/lib/postgres/data
     environment:
       # MYSQL_ROOT_PASSWORD: root_passwd
-      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_USER: guacamole_user
       MYSQL_PASSWORD: some_password
       MYSQL_DATABASE: guacamole_db
