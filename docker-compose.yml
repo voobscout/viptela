@@ -68,8 +68,7 @@ services:
     domainname: njk.li
     restart: always
     volumes:
-      # - /mnt/config/teleport:/var/lib/teleport
-      - /var/lib/teleport
+      - /mnt/config/teleport:/var/lib/teleport
       - ./resources/teleport_site.yml:/etc/teleport.yml
     environment:
       VIRTUAL_HOST: teleport.njk.li
