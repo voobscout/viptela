@@ -189,6 +189,7 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - ./dockerfiles/libvirt/overlay/etc/systemd/system/teleport.service.d/override.conf:/etc/systemd/system/teleport.service.d/override.conf
       - ./resources/xvnc_defaults:/etc/default/xvnc
+      - ./scripts/lightdm-helper:/etc/container-boot.d/lightdm
     networks:
       - management
       - n_172_16_1_0__24
@@ -642,6 +643,7 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
       - ./dockerfiles/libvirt/overlay/etc/systemd/system/teleport.service.d/override.conf:/etc/systemd/system/teleport.service.d/override.conf
       - ./resources/xvnc_defaults:/etc/default/xvnc
+      - ./scripts/lightdm-helper:/etc/container-boot.d/lightdm
     networks:
       - management
       - n_192_168_2_0__24
