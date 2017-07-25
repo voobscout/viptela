@@ -114,7 +114,7 @@ services:
     hostname: mariadb
     domainname: njk.li
     # debugging only:
-    command: ["--log=/tmp/queries.sql"]
+    # command: ["--log=/tmp/queries.sql"]
     restart: always
     volumes:
       - ./resources/guacamole_initdb_mysql.sql:/docker-entrypoint-initdb.d/init.sql
