@@ -97,7 +97,7 @@ services:
     domainname: njk.li
     restart: always
     volumes:
-      - ./resources/guacamole_initdb.sql:/docker-entrypoint-initdb.d/guacamole_initdb.sql
+      - ./resources/guacamole_initdb_postres.sql:/docker-entrypoint-initdb.d/init.sql
       - data:/var/lib/postgres/data
     environment:
       POSTGRES_USER: guacamole_user
