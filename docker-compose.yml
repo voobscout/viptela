@@ -273,7 +273,7 @@ services:
       VM_TITLE: 'E - Regional DataCenter'
       VM_MEM: 2048m
       VM_CPUS: 2
-      VM_NET: '10.10.10.0/24 192.168.7.0/24 172.16.7.0/24 10.0.7.0/24'
+      VM_NET: '10.10.10.0/24 192.168.7.0/25 192.168.7.128/25 172.16.7.0/24 10.0.7.0/24'
       VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
       VM_DISK_SIZE: 4G
     hostname: e-reg-dc
@@ -292,7 +292,8 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
-      - n_192_168_7_0__24
+      - n_192_168_7_0__25
+      - n_192_168_7_128__25
       - n_172_16_7_0__24
       - n_10_0_7_0__24
 
@@ -305,7 +306,7 @@ services:
       VM_TITLE: 'pfSense 2.3.4 embedded kernel'
       VM_MEM: 1024m
       VM_CPUS: 1
-      VM_NET: '10.10.10.0/24 10.11.11.0/24 192.168.7.0/24'
+      VM_NET: '10.10.10.0/24 10.11.11.0/24 192.168.7.0/25 192.168.7.128/25'
       VM_DISK: /var/lib/libvirt/images/pfSense_234.qcow2
       VM_DISK_SIZE: 5G
     hostname: pfsense
@@ -323,7 +324,8 @@ services:
     networks:
       - management
       - egress
-      - n_192_168_7_0__24
+      - n_192_168_7_0__25
+      - n_192_168_7_128__25
 
 # TODO: connect NIC to EGRESS
   e-core-switch:
@@ -333,7 +335,7 @@ services:
       VM_TITLE: 'E - DataCenter Core Switch'
       VM_MEM: 2048m
       VM_CPUS: 2
-      VM_NET: '10.10.10.0/24 192.168.5.0/24 172.16.51.0/24 192.168.6.0/25 172.16.52.0/24 192.168.6.128/25'
+      VM_NET: '10.10.10.0/24 10.11.11.0/24 192.168.5.0/24 172.16.51.0/24 192.168.6.0/25 172.16.52.0/24 192.168.6.128/25'
       VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
       VM_DISK_SIZE: 4G
     hostname: e-core-switch
@@ -350,11 +352,22 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
+      - egress
       - n_192_168_5_0__24
       - n_172_16_51_0__24
       - n_192_168_6_0__25
       - n_172_16_52_0__24
       - n_192_168_6_128__25
+
+  ux-srv-coreswitch:
+    image: voobscout/viptela:teleport
+    command: 'teleport start --roles=node --token=internalxyz --auth-server=teleport:3025'
+    hostname: ux-srv-coreswitch
+    domainname: njk.li
+    restart: always
+    networks:
+      - management
+      - n_192_168_5_0__24
 
   e-dc-left:
     image: voobscout/viptela
@@ -422,7 +435,7 @@ services:
       VM_TITLE: 'E - Internet router'
       VM_MEM: 2048m
       VM_CPUS: 2
-      VM_NET: '10.10.10.0/24 10.0.7.0/24 10.0.5.0/24 172.16.8.0/24 10.0.6.0/24 10.0.1.128/25 10.0.4.0/24 10.0.2.0/24'
+      VM_NET: '10.10.10.0/24 10.11.11.0/24 10.0.7.0/24 10.0.5.0/24 172.16.6.0/24 10.0.8.0/24 10.0.1.128/25 10.0.2.0/24 10.0.4.0/24'
       VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
       VM_DISK_SIZE: 4G
     hostname: e-inet
@@ -439,13 +452,14 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
+      - egress
       - n_10_0_7_0__24
       - n_10_0_5_0__24
-      - n_172_16_8_0__24
-      - n_10_0_6_0__24
+      - n_172_16_6_0__24
+      - n_10_0_8_0__24
       - n_10_0_1_128__25
-      - n_10_0_4_0__24
       - n_10_0_2_0__24
+      - n_10_0_4_0__24
 
   e-mpls:
     image: voobscout/viptela
@@ -454,7 +468,7 @@ services:
       VM_TITLE: 'E - MPLS'
       VM_MEM: 2048m
       VM_CPUS: 2
-      VM_NET: '10.10.10.0/24 172.16.7.0/24 172.16.5.0/24 172.16.6.0/24 10.0.7.0/24 172.16.1.0/24 172.16.2.0/24 172.16.3.0/24'
+      VM_NET: '10.10.10.0/24 172.16.7.0/24 172.16.5.0/24 172.16.6.0/24 172.16.8.0/24 172.16.1.0/24 172.16.2.0/24 172.16.3.0/24'
       VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
       VM_DISK_SIZE: 4G
     hostname: e-mpls
@@ -474,7 +488,7 @@ services:
       - n_172_16_7_0__24
       - n_172_16_5_0__24
       - n_172_16_6_0__24
-      - n_10_0_7_0__24
+      - n_172_16_8_0__24
       - n_172_16_1_0__24
       - n_172_16_2_0__24
       - n_172_16_3_0__24
@@ -658,7 +672,6 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
-      - n_10_0_21_0__24
       - n_192_168_100_0__24
 
   e-bond2-demo:
@@ -685,7 +698,6 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
-      - n_10_0_21_0__24
       - n_192_168_100_0__24
 
   s-smart1-demo:
@@ -712,7 +724,6 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
-      - n_10_0_21_0__24
       - n_192_168_100_0__24
 
   s-smart2-demo:
@@ -739,7 +750,6 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
-      - n_10_0_21_0__24
       - n_192_168_100_0__24
 
 # TODO: separate URI - sdwan-demo.com/vmanage
@@ -767,7 +777,6 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup
     networks:
       - management
-      - n_10_0_21_0__24
       - n_192_168_100_0__24
 
   e-cloud:
@@ -777,7 +786,7 @@ services:
       VM_TITLE: 'E - Cloud Upper right (demonstrator)'
       VM_MEM: 2g
       VM_CPUS: 2
-      VM_NET: '10.10.10.0/24 192.168.100.0/24 172.16.8.0/24 10.0.7.0/24'
+      VM_NET: '10.10.10.0/24 192.168.100.0/24 172.16.8.0/24 10.0.8.0/24'
       VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
       VM_DISK_SIZE: 5G
     hostname: e-cloud
@@ -796,7 +805,7 @@ services:
       - management
       - n_192_168_100_0__24
       - n_172_16_8_0__24
-      - n_10_0_7_0__24
+      - n_10_0_8_0__24
 
   e-b2b:
     image: voobscout/viptela
@@ -805,7 +814,7 @@ services:
       VM_TITLE: 'E - B2B East-Side'
       VM_MEM: 2g
       VM_CPUS: 2
-      VM_NET: '10.10.10.0/24 10.0.4.0/24 192.168.4.0/24'
+      VM_NET: '10.10.10.0/24 10.0.4.0/24 192.168.4.0/25'
       VM_DISK: /var/lib/libvirt/images/viptela-edge-genericx86-64.qcow2
       VM_DISK_SIZE: 5G
     hostname: e-b2b
@@ -852,6 +861,16 @@ services:
       - n_192_168_4_0__25
       - n_192_168_4_128__25
 
+  ux-srv-b2b:
+    image: voobscout/viptela:teleport
+    command: 'teleport start --roles=node --token=internalxyz --auth-server=teleport:3025'
+    hostname: ux-srv-b2b
+    domainname: njk.li
+    restart: always
+    networks:
+      - management
+      - n_192_168_4_128__25
+
   csr1k-site3:
     image: voobscout/viptela
     environment:
@@ -878,16 +897,6 @@ services:
       - management
       - n_172_16_3_0__24
       - n_192_168_3_0__24
-
-  ux-srv-b2b:
-    image: voobscout/viptela:teleport
-    command: 'teleport start --roles=node --token=internalxyz --auth-server=teleport:3025'
-    hostname: ux-srv-b2b
-    domainname: njk.li
-    restart: always
-    networks:
-      - management
-      - n_192_168_4_128__25
 
   ux-srv-site3:
     image: voobscout/viptela:teleport
@@ -1060,14 +1069,22 @@ networks:
       driver: default
       config:
       - subnet: 192.168.100.0/24
-  n_192_168_7_0__24:
+  n_192_168_7_0__25:
     driver: bridge
     driver_opts:
       com.docker.network.enable_ipv6: 'false'
     ipam:
       driver: default
       config:
-      - subnet: 192.168.7.0/24
+      - subnet: 192.168.7.0/25
+  n_192_168_7_128__25:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.7.128/25
   n_172_16_21_0__24:
     driver: bridge
     driver_opts:
