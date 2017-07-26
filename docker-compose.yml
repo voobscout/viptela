@@ -1109,6 +1109,14 @@ networks:
       driver: default
       config:
       - subnet: 10.0.1.0/25
+  n_10_0_8_0__24:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.8.0/24
   n_10_0_1_128__25:
     driver: bridge
     driver_opts:
