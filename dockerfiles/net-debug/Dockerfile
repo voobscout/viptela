@@ -22,6 +22,7 @@ RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu && \
                          umit \
                          tigervnc \
                          x11vnc \
+                         vlc \
                          chromium \
                          firefox \
                          libreoffice-fresh \
