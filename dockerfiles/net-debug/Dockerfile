@@ -12,6 +12,8 @@ RUN curl https://blackarch.org/strap.sh > /tmp/ba_repo && \
 
 RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu && \
                          yaourt --aur --noconfirm --needed -S \
+                         zsh \
+                         screen \
                          xfce4 \
                          xfce4-goodies \
                          terminator \
@@ -23,6 +25,9 @@ RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu && \
                          tigervnc \
                          x11vnc \
                          vlc \
+                         qt4 \
+                         xarchiver \
+                         unzip \
                          chromium \
                          firefox \
                          libreoffice-fresh \
@@ -31,5 +36,6 @@ RUN runuser -l dev -c 'yaourt --aur --noconfirm --needed -Syyu && \
 
 ADD https://raw.githubusercontent.com/voobscout/viptela/master/resources/xvnc.service /usr/lib/systemd/system/xvnc.service
 
-RUN systemctl enable teleport.service && \
+RUN usermod -a -G wireshark dev && \
+    systemctl enable teleport.service && \
     systemctl enable xvnc.service
