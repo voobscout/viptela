@@ -91,20 +91,18 @@ services:
       - 3025:3025
       - 3080:3080
 
-# TODO: guacamole images get updated, need to always keep the latest init script version with
-# docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysq > ~/mysql_initdb.sql
-
   mariadb:
     image: mariadb
     hostname: mariadb
     domainname: njk.li
-    # debugging only:
-    # command: ["--log=/tmp/queries.sql"]
+    # debugging:
+    # SET global general_log_file='/tmp/mysql.log';
+    # SET global log_output = 'file';
+    # SET global general_log = on;
     restart: always
     volumes:
-      - ./resources/guacamole_initdb_mysql.sql:/docker-entrypoint-initdb.d/init.sql
-      # - data:/var/lib/mysql
-      - ./resources/mysql_debug.cnf:/etc/mysql/mariadb.conf.d/debug.cnf
+      # - ./resources/guacamole_initdb_mysql.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./resources/final_dump.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       # MYSQL_ROOT_PASSWORD: root_passwd
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
@@ -122,6 +120,8 @@ services:
     networks:
       - management
 
+# FIXME: guacamole images get updated, need to always keep the latest init script version with
+# docker run --rm guacamole/guacamole /opt/guacamole/bin/initdb.sh --mysq > ~/mysql_initdb.sql
 # TODO: Change main login page html to skip guacamole logos and have 'SD-WAN Demo'
 # URI sdwan-demo.com/desktop
   guac:
@@ -614,9 +614,9 @@ services:
 # For onetime setup effort - direct access via ssh from outside
 
 # FIXME: teleport doesn't work!
-  ux-desktop-site2:
+  desktop:
     image: voobscout/viptela:net-debug
-    hostname: ux-desktop-site2
+    hostname: desktop
     domainname: njk.li
     privileged: true
     stdin_open: true
