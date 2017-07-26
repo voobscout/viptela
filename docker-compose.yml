@@ -102,6 +102,7 @@ services:
     restart: always
     volumes:
       # - ./resources/guacamole_initdb_mysql.sql:/docker-entrypoint-initdb.d/init.sql
+      # FIXME: Find a more elegant way to manage users/sessions during provisioning.
       - ./resources/final_dump.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       # MYSQL_ROOT_PASSWORD: root_passwd
@@ -159,7 +160,6 @@ services:
 ##################################################
 # Debugging networks
 ##################################################
-# FIXME: teleport doesn't work!
   net-debug:
     image: voobscout/viptela:net-debug
     hostname: net-debug
@@ -605,15 +605,13 @@ services:
       - n_172_16_2_0__24
       - n_192_168_2_0__24
 
-# TODO: have it teleport into cluster
-# VNC session from desktop be accessible on sdwan-demo.com/desktop
-# Direct vnc, without guacamole menu
-# MAC via guacamole auth
-# Infinite login timeout on guac sessions
-# Xvnc port per user on machine
-# For onetime setup effort - direct access via ssh from outside
+# TODO: VNC session from desktop be accessible on sdwan-demo.com/desktop
+# DONE: Direct vnc, without guacamole menu
+# DONE: MAC via guacamole auth
+# DONE: Infinite login timeout on guac sessions
+# DONE: Xvnc port per user on machine
+# DONE: For onetime setup effort - direct access via ssh from outside (using teleport)
 
-# FIXME: teleport doesn't work!
   desktop:
     image: voobscout/viptela:net-debug
     hostname: desktop
