@@ -650,6 +650,8 @@ services:
     networks:
       - management
       - n_192_168_2_0__24
+    ports:
+      - "2222:22"
 
   e-bond1-demo:
     image: voobscout/viptela
